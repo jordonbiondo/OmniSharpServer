@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -11,8 +11,7 @@
     <RootNamespace>OmniSharp</RootNamespace>
     <AssemblyName>OmniSharp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile></TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -97,11 +96,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AutoComplete\HelpService.cs" />
+    <Compile Include="Common\CygPathWrapper.cs" />
+    <Compile Include="Configuration\OmniSharpConfiguration.cs" />
+    <Compile Include="Configuration\PathMode.cs" />
+    <Compile Include="Configuration\PathReplacement.cs" />
+    <Compile Include="Configuration\TestCommands.cs" />
+    <Compile Include="TestContextInformation\GetContextResponse.cs" />
+    <Compile Include="TestContextInformation\TestCommandRequest.cs" />
     <Compile Include="Documentation\DocumentationFetcher.cs" />
     <Compile Include="Documentation\MonoDocDocumentationProvider.cs" />
-    <Compile Include="ContextInformation\GetContextModule.cs" />
-    <Compile Include="ContextInformation\GetContextHandler.cs" />
-    <Compile Include="ContextInformation\GetContextResponse.cs" />
+    <Compile Include="TestContextInformation\GetTestContextModule.cs" />
+    <Compile Include="TestContextInformation\GetTestContextHandler.cs" />
+    <Compile Include="TestContextInformation\GetTestContextResponse.cs" />
     <Compile Include="Build\BuildCommandBuilder.cs" />
     <Compile Include="Build\BuildCommandModule.cs" />
     <Compile Include="Common\FileSystem.cs" />
@@ -153,6 +159,7 @@
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\MemberCollector.cs" />
     <Compile Include="Common\QuickFix.cs" />
+    <Compile Include="CheckReadyStatus\CheckReadyStatusModule.cs" />
     <Compile Include="CodeActions\CodeActionProviders.cs" />
     <Compile Include="CodeActions\GetCodeActionsHandler.cs" />
     <Compile Include="CodeActions\GetCodeActionsModule.cs" />
@@ -236,6 +243,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -274,7 +284,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="UpdateBuffer\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

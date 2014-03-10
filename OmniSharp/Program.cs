@@ -1,6 +1,7 @@
 ﻿using System;
-using System.IO;
+using System.Net;
 using System.Threading;
+using System.Net.Sockets;
 using NDesk.Options;
 using Nancy.Hosting.Self;
 using OmniSharp.Solution;
@@ -14,6 +15,7 @@ namespace OmniSharp
         {
             bool showHelp = false;
             string solutionPath = null;
+            string clientPathMode = null;
 
             var port = 2000;
             bool verbose = false;
@@ -29,6 +31,10 @@ namespace OmniSharp
                             (int p) => port = p
                         },
                         {
+                            "c|client-path-mode=", "The path mode of the client (Cygwin, Windows or Unix)",
+                            c => clientPathMode = c
+                        },
+                        {
                             "v|verbose", "Output debug information",
                             v => verbose = v != null
                         },
@@ -37,6 +43,7 @@ namespace OmniSharp
                             h => showHelp = h != null
                         },
                     };
+           
 
             try
             {
@@ -57,53 +64,49 @@ namespace OmniSharp
                 return;
             }
 
-            StartServer(solutionPath, port, verbose);
+            StartServer(solutionPath, clientPathMode, port, verbose);
             
         }
 
-        private static void StartServer(string solutionPath, int port, bool verbose)
+        private static void StartServer(string solutionPath, string clientPathMode, int port, bool verbose)
         {
-            var lockfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lockfile-" + port);
-
             try
             {
-                using (new FileStream(lockfile, FileMode.OpenOrCreate, FileAccess.Read, FileShare.None))
+                Configuration.ConfigurationLoader.Load(clientPathMode);
+
+                var solution = new CSharpSolution();
+                Console.CancelKeyPress +=
+                    (sender, e) =>
+                        {
+                            solution.Terminated = true;
+                            Console.WriteLine("Ctrl-C pressed");
+                            e.Cancel = true;
+                        };
+
+                var nancyHost = new NancyHost(new Bootstrapper(solution, new NativeFileSystem(), verbose), new HostConfiguration{RewriteLocalhost=false}, new Uri("http://localhost:" + port));
+
+                nancyHost.Start();
+                Console.WriteLine("OmniSharp server is listening");
+                solution.LoadSolution(solutionPath.ApplyPathReplacementsForServer());
+                Console.WriteLine("Solution has finished loading");
+                while (!solution.Terminated)
                 {
-                    var solution = new CSharpSolution();
-                    Console.CancelKeyPress +=
-                        (sender, e) =>
-                            {
-                                solution.Terminated = true;
-                                Console.WriteLine("Ctrl-C pressed");
-                                e.Cancel = true;
-                            };
-
-					var nancyHost = new NancyHost(new Bootstrapper(solution, new NativeFileSystem(), verbose), new Uri("http://localhost:" + port));
-
-                    nancyHost.Start();
-					Console.WriteLine("OmniSharp server is listening");
-					solution.LoadSolution(solutionPath);
-					Console.WriteLine("Solution has finished loading");
-                    while (!solution.Terminated)
-                    {
-                        Thread.Sleep(1000);
-                    }
-                    
-                    Console.WriteLine("Quit gracefully");
-                    nancyHost.Stop();
+                    Thread.Sleep(1000);
                 }
-                DeleteLockFile(lockfile);
+                
+                Console.WriteLine("Quit gracefully");
+                nancyHost.Stop();
             }
-            catch (IOException)
+            catch(Exception e)
             {
-                Console.WriteLine("Detected an OmniSharp instance already running on port " + port + ". Press a key.");
-                Console.ReadKey();
+				if(e is SocketException || e is HttpListenerException)
+				{
+					Console.Error.WriteLine("Detected an OmniSharp instance already running on port " + port + ". Press a key.");
+					Console.ReadKey();
+					return;
+				}
+				throw;
             }
-        }
-
-        private static void DeleteLockFile(string lockfile)
-        {
-            File.Delete(lockfile);
         }
 
         static void ShowHelp(OptionSet p)

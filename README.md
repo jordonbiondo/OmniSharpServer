@@ -1,6 +1,7 @@
 OmniSharpServer
 ===============
-[![Build Status](https://travis-ci.org/nosami/OmniSharpServer.png)](https://travis-ci.org/nosami/OmniSharpServer)
+
+[![Build Status](https://travis-ci.org/nosami/OmniSharpServer.png?branch=master)](https://travis-ci.org/nosami/OmniSharpServer)
 
 HTTP wrapper around NRefactory allowing C# editor plugins to be written for any editor in any language.
 
@@ -19,13 +20,13 @@ and [Emacs OmniSharp plugin](https://github.com/sp3ctum/omnisharp-emacs).
 ####Windows
     git clone https://github.com/nosami/OmniSharpServer.git
     cd OmniSharpServer
+
+    # (if using Cygwin, overwrite the default config file config.json with config-cygwin.json)
+    copy OmniSharp\config-cygwin.json OmniSharp\config.json
+
     msbuild /p:Platform="Any CPU"
     
 
 To start the Omnisharp server manually (The Vim OmniSharp client and YouCompleteMe may start this for you automatically):
 
 	[mono] OmniSharp.exe -s (path\to\sln)
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/nosami/omnisharpserver/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
